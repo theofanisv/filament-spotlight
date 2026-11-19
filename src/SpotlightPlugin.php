@@ -31,13 +31,14 @@ class SpotlightPlugin implements Plugin
     public function register(Panel $panel): void
     {
         // The script is loaded on request (see the service provider), so it is printed here, with the component,
-        // only on the panels that use the plugin.
+        // only on the panels that use the plugin. The component is loaded right after the page (Livewire's deferred
+        // loading): building its list of commands asks for a permission per command, and every page waited for it.
         $panel->renderHook(
             'panels::scripts.after',
             fn () => collect(FilamentAsset::getScripts([self::$name]))
                 ->map(fn (Js $script) => $script->getHtml()->toHtml())
                 ->implode('')
-                .Blade::render("@livewire('livewire-ui-spotlight')")
+                .Blade::render("@livewire('livewire-ui-spotlight', ['lazy' => 'on-load'])")
         );
     }
 
